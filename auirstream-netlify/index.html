@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#070b12" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)" />
+    <title>auirstream — catalogue et lecture</title>
+    <meta
+      name="description"
+      content="auirstream : catalogue éditorial de films, séries et animés avec lecteur intégré. Métadonnées fournies par TMDB."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
+    <link rel="dns-prefetch" href="https://image.tmdb.org" />
+    <link rel="preconnect" href="https://fluxora.sbs" crossorigin />
+    <!--
+      Aucun script inline : la politique de sécurité de contenu (netlify.toml)
+      n'autorise que les scripts du site et le SDK push explicitement listé.
+      Le SDK de notifications est chargé par src/lib/push.js (module dédié).
+    -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <div style="padding: 24px; font-family: system-ui, sans-serif">
+        auirstream nécessite JavaScript pour afficher le catalogue et le lecteur.
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

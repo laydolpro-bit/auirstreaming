@@ -1,0 +1,91 @@
+# auirstream - configuration Netlify
+#
+# Deux façons de déployer :
+#   1) Netlify CLI depuis ce dossier (voir DEMARRER.md) : aucune connexion GitHub requise.
+#   2) Dépôt Git relié à Netlify : mêmes réglages, les variables privées
+#      (TMDB_API_KEY, NETWORK_SMARTLINK_URL) se règlent dans l'interface Netlify.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--no-audit --no-fund"
+
+# ---------------------------------------------------------------------------
+# Redirections
+# L'ordre compte : la première règle qui correspond gagne.
+# ATTENTION : la règle SPA ne doit JAMAIS utiliser force = true, sinon elle
+# capturait /3231865.sw.js et les autres fichiers réels servis par Netlify.
+# Un fichier réellement présent dans dist/ a toujours la priorité sur une
+# réécriture non forcée.
+# ---------------------------------------------------------------------------
+
+# Proxy catalogue TMDB (la clé reste côté serveur).
+[[redirects]]
+  from = "/api/catalog"
+  to = "/.netlify/functions/catalog"
+  status = 200
+
+# Configuration publique du site (Smartlink, zone push).
+[[redirects]]
+  from = "/api/config"
+  to = "/.netlify/functions/config"
+  status = 200
+
+# Le service worker push doit rester un fichier réel : on le réaffirme
+# explicitement, sans forcer, pour qu'aucune règle générique ne le capture.
+[[redirects]]
+  from = "/3231865.sw.js"
+  to = "/3231865.sw.js"
+  status = 200
+  force = false
+
+# Application monopage React : les routes inconnues retombent sur index.html.
+# Aucune route API ni fichier réel (sw.js, assets, favicon) n'est concerné.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+# ---------------------------------------------------------------------------
+# En-têtes de sécurité et de cache
+# ---------------------------------------------------------------------------
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=(), payment=(), usb=(), autoplay=(self \"https://fluxora.sbs\"), fullscreen=(self \"https://fluxora.sbs\"), picture-in-picture=(self \"https://fluxora.sbs\")"
+    # CSP adaptée aux seuls domaines réellement nécessaires, sans wildcard générale.
+    # - 'self' : application, /api/catalog, /api/config
+    # - image.tmdb.org : affiches et backdrops TMDB
+    # - fluxora.sbs : lecteur vidéo intégré (iframe)
+    # - push-sdk.com : SDK de notifications publicitaires (chargé en script)
+    # - fcm.googleapis.com / updates.push.services.mozilla.com : services de push navigateur
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://push-sdk.com; worker-src 'self'; child-src 'self' https://fluxora.sbs; frame-src https://fluxora.sbs; img-src 'self' data: blob: https://image.tmdb.org; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://push-sdk.com https://fcm.googleapis.com https://updates.push.services.mozilla.com; media-src 'self' https://fluxora.sbs; manifest-src 'self'; form-action 'self'; frame-ancestors 'self'"
+
+# Le worker push doit pouvoir être revalidé et ne jamais être servi depuis un cache long.
+[[headers]]
+  for = "/3231865.sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+    Service-Worker-Allowed = "/"
+    X-Content-Type-Options = "nosniff"
+
+# Assets versionnés par Vite : immuables.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Fichiers de build racine : cache court pour propager vite les mises à jour.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

@@ -1,0 +1,28 @@
+{
+  "name": "auirstream",
+  "private": true,
+  "version": "1.0.0",
+  "description": "auirstream - catalogue et lecteur video (metadonnees TMDB)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "netlify:dev": "netlify dev",
+    "netlify:deploy": "netlify deploy",
+    "netlify:deploy:prod": "netlify deploy --prod",
+    "test": "npm run test:proxy && npm run test:player && npm run test:push",
+    "test:proxy": "node scripts/test-proxy.mjs",
+    "test:player": "node scripts/test-player.mjs",
+    "test:push": "node scripts/test-push.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  }
+}
